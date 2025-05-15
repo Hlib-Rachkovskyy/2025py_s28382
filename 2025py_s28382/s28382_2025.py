@@ -1,18 +1,33 @@
 import datetime
 import random
+import time
 
 
 def generuj_sekwencje(dlugosc, imie):
+
+    # ORIGINAL:
+    #
+    # MODIFIED (Zapisywanie czasu poczatkowego potrzebne dla wyliczania czasu generowania):
+    start_time = time.time()
+
     nukleotydy = ['A', 'C', 'G', 'T']
     sekwencja = ''.join(random.choice(nukleotydy) for _ in range(dlugosc))
 
     index = random.randint(0, dlugosc - 1)
     sekwencja = sekwencja[:index] + imie + sekwencja[index + len(imie):]
 
-    return sekwencja
+    # ORIGINAL:
+    #
+    # return sekwencja
+    # MODIFIED (czas generowania potrzebny jest dla lepszej mozliwosci zarzadzania danymi):
+    end_time = time.time()
+    czas_generowania = end_time - start_time
 
-
-def oblicz_statystyki(sekwencja):
+    return sekwencja, czas_generowania
+# ORIGINAL:
+# oblicz_statystyki(sekwencja);
+# MODIFIED (dodanie id_sekwencji ulatwia zapisywanie statystyk oraz czas generowania pomaga w zarzadzaniu danymi):
+def oblicz_oraz_zapisz_statystyki(sekwencja, id_sekwencji, czas_generowania):
     a_count = sekwencja.count('A')
     c_count = sekwencja.count('C')
     g_count = sekwencja.count('G')
@@ -26,6 +41,13 @@ def oblicz_statystyki(sekwencja):
     t_percentage = (t_count / dlugosc) * 100
 
     cg_ratio = ((c_count + g_count) / (a_count + t_count)) * 100 if (a_count + t_count) != 0 else 0
+    # ORIGINAL:
+    #
+    # MODIFIED (Zapisywanie pozwala utrzymiwanie danych w porzadku):
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("statistics.txt", 'a') as f:
+        f.write(
+            f"{now} | ID: {id_sekwencji} | A: {a_percentage:.2f}% | C: {c_percentage:.2f}% | G: {g_percentage:.2f}% | T: {t_percentage:.2f}% | %CG: {cg_ratio:.2f}\n | Time: {czas_generowania:.2f}\n")
 
     return a_percentage, c_percentage, g_percentage, t_percentage, cg_ratio
 
@@ -35,16 +57,6 @@ def zapisz_do_pliku(id_sekwencji, opis, sekwencja):
     with open(nazwa_pliku, 'w') as f:
         f.write(f">{id_sekwencji} {opis}\n")
         f.write(sekwencja + "\n")
-
-# ORIGINAL:
-#
-# MODIFIED (Przechowywanie logiki w metodzie pozwala zachowac czytelnosc kodu):
-def zapisz_statystyki(id_sekwencji, a, c, g, t, cg):
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open("statistics.txt", 'a') as f:
-        f.write(
-            f"{now} | ID: {id_sekwencji} | A: {a:.2f}% | C: {c:.2f}% | G: {g:.2f}% | T: {t:.2f}% | %CG: {cg:.2f}\n")
-
 
 # ORIGINAL:
 #
@@ -72,12 +84,16 @@ def main():
     opis = input("Podaj opis sekwencji: ")
     imie = input("Podaj imię: ")
 
-    sekwencja = generuj_sekwencje(dlugosc, imie)
-
+    # ORIGINAL:
+    # sekwencja = generuj_sekwencje(dlugosc, imie)
+    # MODIFIED (czas generowania pomaga w zarzadzaniu danymi):
+    sekwencja, czas_generowania = generuj_sekwencje(dlugosc, imie)
     zapisz_do_pliku(id_sekwencji, opis, sekwencja)
 
-    a_percentage, c_percentage, g_percentage, t_percentage, cg_ratio = oblicz_statystyki(sekwencja)
-
+    # ORIGINAL:
+    #     a_percentage, c_percentage, g_percentage, t_percentage, cg_ratio = oblicz_statystyki(sekwencja)
+    # MODIFIED (zapisywanie statystyk w pliku pomaga ich zarzadzaniu oraz czas generowania pokazuje ile czasu na danym komputerze zajela generacja):
+    a_percentage, c_percentage, g_percentage, t_percentage, cg_ratio = oblicz_oraz_zapisz_statystyki(sekwencja, id_sekwencji, czas_generowania)
 
     print("\n")
     print(f"Sekwencja została zapisana do pliku {id_sekwencji}.fasta")
@@ -88,10 +104,7 @@ def main():
     print(f"T: {t_percentage:.2f}%")
     print(f"%CG: {cg_ratio:.2f}")
 
-    # ORIGINAL:
-    #
-    # MODIFIED (zapisywanie statystyk w pliku pomaga ich zarzadzaniu):
-    zapisz_statystyki(id_sekwencji, a_percentage, c_percentage, g_percentage, t_percentage, cg_ratio)
+
 
 if __name__ == "__main__":
     main()
