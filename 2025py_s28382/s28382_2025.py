@@ -1,5 +1,5 @@
+import datetime
 import random
-import matplotlib.pyplot as plt
 
 
 def generuj_sekwencje(dlugosc, imie):
@@ -36,6 +36,15 @@ def zapisz_do_pliku(id_sekwencji, opis, sekwencja):
         f.write(f">{id_sekwencji} {opis}\n")
         f.write(sekwencja + "\n")
 
+# ORIGINAL:
+#
+# MODIFIED (Przechowywanie logiki w metodzie pozwala zachowac czytelnosc kodu):
+def zapisz_statystyki(id_sekwencji, a, c, g, t, cg):
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("statistics.txt", 'a') as f:
+        f.write(
+            f"{now} | ID: {id_sekwencji} | A: {a:.2f}% | C: {c:.2f}% | G: {g:.2f}% | T: {t:.2f}% | %CG: {cg:.2f}\n")
+
 
 # ORIGINAL:
 #
@@ -52,20 +61,6 @@ def wprowadz_dlugosc_jako_liczbe(dlugosc):
     return dlugosc
 
 
-# ORIGINAL:
-#
-# MODIFIED (Utworzenie dodatkowej funkcji dla wyswietlania wykresu kolowego zachowuje czytelnosc kodu):
-def wykres_kolowy(a_percentage, c_percentage, g_percentage, t_percentage):
-    labels = ['A', 'C', 'G', 'T']
-    sizes = [a_percentage, c_percentage, g_percentage, t_percentage]
-    colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99']
-
-    fig1, ax1 = plt.subplots()
-    ax1.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
-    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
-    plt.title("Zawartość nukleotydów A, C, G, T w sekwencji DNA")
-    plt.show()
 
 
 def main():
@@ -83,11 +78,7 @@ def main():
 
     a_percentage, c_percentage, g_percentage, t_percentage, cg_ratio = oblicz_statystyki(sekwencja)
 
-    # ORIGINAL:
-    #
-    # MODIFIED (Zapisywanie danych jako wykres kolowy robi ich bardziej czytelnymi):
-    wykres_kolowy(a_percentage, c_percentage, g_percentage, t_percentage)
-    # zrob zapisywanie
+
     print("\n")
     print(f"Sekwencja została zapisana do pliku {id_sekwencji}.fasta")
     print("Statystyki sekwencji:")
@@ -97,6 +88,10 @@ def main():
     print(f"T: {t_percentage:.2f}%")
     print(f"%CG: {cg_ratio:.2f}")
 
+    # ORIGINAL:
+    #
+    # MODIFIED (zapisywanie statystyk w pliku pomaga ich zarzadzaniu):
+    zapisz_statystyki(id_sekwencji, a_percentage, c_percentage, g_percentage, t_percentage, cg_ratio)
 
 if __name__ == "__main__":
     main()
